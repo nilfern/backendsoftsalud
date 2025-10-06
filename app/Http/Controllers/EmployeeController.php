@@ -18,8 +18,43 @@ class EmployeeController extends Controller
 
 
   /**
-   * Display a listing of the resource.
+   * Lista de empleados
+   * 
+   * Retorna la lista de empleados registrados.   
+   * 
+   * @response array{
+   *   current_page: 1,
+   *   data: array{
+   *     id: int,
+   *     name: string,
+   *     surname: string,
+   *     email: string,
+   *     users: array{
+   *       id: int,
+   *       email: string,
+   *       role: string
+   *     }
+   *   }[],
+   *   first_page_url: "http://127.0.0.1:8000/api/employee?page=1",
+   *   from: 1,
+   *   last_page: 2,
+   *   last_page_url: "http://127.0.0.1:8000/api/employee?page=2",
+   *   links: array{
+   *     url: ?string,
+   *     label: string,
+   *     active: bool
+   *   }[],
+   *   next_page_url: "http://127.0.0.1:8000/api/employee?page=2",
+   *   path: "http://127.0.0.1:8000/api/employee",
+   *   per_page: 10,
+   *   prev_page_url: ?string,
+   *   to: 10,
+   *   total: 11
+   * }
+   
+ 
    */
+
   public function index()
   {
 
@@ -28,7 +63,7 @@ class EmployeeController extends Controller
     $resultResponse->setData($employee);
     $resultResponse->setStatusCode(ResultResponse::SUCCESS_CODE);
     $resultResponse->setMessage(ResultResponse::TXT_SUCCESS_CODE);
-    //return response()->json($resultResponse);
+
     return response()->json($employee);
   }
 
@@ -41,7 +76,11 @@ class EmployeeController extends Controller
   }
 
   /**
-   * Store a newly created resource in storage.
+   * Registrar empleado
+   * 
+   * Registra los datos del empleado.
+   * 
+   *  
    */
   public function store(Request $request)
   {
@@ -95,7 +134,7 @@ class EmployeeController extends Controller
               'address' => $request->get('address'),
               'user_id' => $newUser->id,
             ]);
-
+            $request->get('photo');
             $newEmployee->save();
             $resultResponse->setData($newEmployee);
             $resultResponse->setStatusCode(ResultResponse::SUCCESS_CODE);
@@ -118,7 +157,8 @@ class EmployeeController extends Controller
 
 
   /**
-   * Display the specified resource.
+   *Retornar empleado por DNI
+   *Retorna un empleado consultado por su dni.
    */
   public function show($id)
   {
@@ -137,7 +177,11 @@ class EmployeeController extends Controller
     return response()->json($resultResponse);
   }
 
-
+  /**
+   * Retornar empleado por ID
+   * Retorna un empleado consultado por su id.
+   *  
+   */
   public function showbyid($id)
   {
 
@@ -156,15 +200,10 @@ class EmployeeController extends Controller
   }
 
   /**
-   * Show the form for editing the specified resource.
-   * 
-   * 
-   * 
-   * 
+   * Retornar empleado por UserID
+   * Retorna un empleado consultado por el id de usuario relacionado.  
    * 
    */
-
-
   public function showbyuser($id)
   {
     $resultResponse = new ResultResponse();
@@ -187,7 +226,8 @@ class EmployeeController extends Controller
   }
 
   /**
-   * Update the specified resource in storage.
+   * Actualiza empleado
+   * Actualiza los datos de un empleado especifico.
    */
 
   public function update(Request $request, $id)
@@ -223,13 +263,12 @@ class EmployeeController extends Controller
         $resultResponse->setStatusCode(ResultResponse::SUCCESS_CODE);
         $resultResponse->setMessage(ResultResponse::TXT_SUCCESS_CODE);
       } else {
-
         $resultResponse->setStatusCode(ResultResponse::ERROR_CODE);
         $resultResponse->setMessage($mensaje['errores']);
       }
     } catch (\Exception $e) {
       $resultResponse->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUNT_CODE);
-      $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE);   
+      $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE);
     }
     return response()->json($resultResponse);
   }
@@ -238,11 +277,29 @@ class EmployeeController extends Controller
 
 
   /**
-   * Remove the specified resource from storage.
+   * Eliminar empleado
+   * Borrar los datos de un empleado especifico por su id.
    */
-  public function destroy(employee $employee)
+  public function destroy($id)
   {
     //
+    $resultResponse = new ResultResponse();
+    try {
+
+      $employee = employee::findOrFail($id);
+      $user = User::findOrFail($employee->user_id);
+      $user->delete();
+
+
+      $resultResponse->setData($employee);
+      $resultResponse->setStatusCode(ResultResponse::SUCCESS_CODE);
+      $resultResponse->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+    } catch (\Exception $e) {
+      $resultResponse->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUNT_CODE);
+      $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE);
+    }
+
+    return response()->json($resultResponse);
   }
 
 
@@ -294,11 +351,9 @@ class EmployeeController extends Controller
 
       'name' => 'required|string',
       'surname' => 'required|string',
-      'dni' => 'required|string',
       'genre' => 'required|string',
       'occupation' => 'required|string',
       'gross_salary' => 'required',
-      'email' => 'required|string',     
       'phone' => 'required|string',
 
     ];

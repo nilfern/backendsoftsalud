@@ -26,7 +26,9 @@ class AvailabilityDoctorController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Registrar disponibilidad.
+     * 
+     * Registra la disponibilidad de un medico.
      */
     public function store(Request $request) //OK
     {
@@ -48,7 +50,9 @@ class AvailabilityDoctorController extends Controller
 
 
     /**
-     * Display the specified resource.
+     * Lista disponibilidad.
+     * 
+     * Retorna las disponibilidades de un médico en una fecha seleccionada.
      */
     public function show($id, $date) // OK DISPONIBILIDADES POR EL ID DEL MEDICO Y FECHA
     {
@@ -72,10 +76,15 @@ class AvailabilityDoctorController extends Controller
             $resultResponse->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUNT_CODE);
             $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE);
         }
-      
+
         return response()->json($resultResponse);
     }
 
+    /**
+     * Lista Disponibilidad para la cita.
+     * 
+     * Retorna las disponibilidades del médico para fecha seleccionada.
+     */
     public function showavailability($id, $date) //OK MUESTAR LAS DISPONIBILIDADES DEL MEDICO EN UNA FECHA
     {
         $resultResponse = new ResultResponse();
@@ -103,10 +112,13 @@ class AvailabilityDoctorController extends Controller
 
 
 
+    /**
+     * Lista Disponibilidad por especialidad.
+     * 
+     * Retorna las disponibilidades por la especialidad.
+     */
 
-
-
-    public function showavailabilitySpecialty($id, $date)  //OK DISPONIBILIDADES POR EL ID DEL ESPECIALISTA  Y FECHA
+    public function showavailabilitySpecialty($id, $date)  //OK DISPONIBILIDADES POR EL ID DE La ESPECIALIDAD  Y FECHA
     {
         $resultResponse = new ResultResponse();
         try {
@@ -122,7 +134,7 @@ class AvailabilityDoctorController extends Controller
 
             $grouped = $availability->groupBy('doctor_id')->map(function ($availability) {
                 return [
-                    'doctor' => $availability->first()->doctors, // Información del doctor
+                    'doctor' => $availability->first()->doctors, 
                     'availabilities' => $availability->map(function ($availability) {
                         return [
                             'doctor_id' => $availability->doctor_id,
@@ -137,14 +149,14 @@ class AvailabilityDoctorController extends Controller
             });
 
 
-          
+
 
             if ($availability->isEmpty()) {
                 $resultResponse->setData($grouped->values());
                 $resultResponse->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUNT_CODE);
                 $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE);
             } else {
-            
+
                 $resultResponse->setData($grouped->values());
                 $resultResponse->setStatusCode(ResultResponse::SUCCESS_CODE);
                 $resultResponse->setMessage(ResultResponse::TXT_SUCCESS_CODE);
@@ -153,7 +165,7 @@ class AvailabilityDoctorController extends Controller
             $resultResponse->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUNT_CODE);
             $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE);
         }
-      
+
         return response()->json($resultResponse);
     }
 
@@ -176,7 +188,9 @@ class AvailabilityDoctorController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar dispoinibilidad.
+     * 
+     * Elimina la disponibilidad por su id.
      */
     public function destroy($id) // OK ELIMINA DISPONIBILIDAD
     {

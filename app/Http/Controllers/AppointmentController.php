@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\appointment;
 use App\Models\availability;
 use App\Http\Controllers\Controller;
@@ -12,24 +11,17 @@ use Illuminate\Support\Carbon;
 
 class AppointmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+
+    public function index() {}
+
+
+    public function create() {}
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Registrar datos de la cita.
+     * 
+     * En este end point se registran los datos de la cita.
+     * 
      */
     public function store(Request $request)
     {
@@ -89,7 +81,7 @@ class AppointmentController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * 
      */
     public function update(Request $request, appointment $appointment)
     {
@@ -138,6 +130,43 @@ class AppointmentController extends Controller
     }
 
 
+    /**
+     * Retorna las citas del paciente en una fecha seleccionada
+     *
+     */
+
+    public function appointmentbypatient($id, $date)
+    {
+
+        $resultResponse = new ResultResponse();
+        try {
+            $appointment = appointment::with(['doctors', 'availabilities', 'patients'])->where('patient_id', $id)->whereDate('date_appointments', $date)->whereHas('availabilities', function ($query) {
+                $query->where('status', '!=', 0);
+            })->get();
+
+            if ($appointment->isEmpty()) {
+                $resultResponse->setData($appointment);
+                $resultResponse->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUNT_CODE);
+                $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE);
+            } else {
+                $resultResponse->setData($appointment);
+                $resultResponse->setStatusCode(ResultResponse::SUCCESS_CODE);
+                $resultResponse->setMessage(ResultResponse::TXT_SUCCESS_CODE);
+            }
+        } catch (\Exception $e) {
+            $resultResponse->setStatusCode(ResultResponse::ERROR_ELEMENT_NOT_FOUNT_CODE);
+            $resultResponse->setMessage(ResultResponse::TXT_ERROR_ELEMENT_NOT_FOUNT_CODE + ":" + $e);
+        }
+
+        return response()->json($resultResponse);
+    }
+
+
+    /**
+     * Retorna las citas del médico en una fecha seleccionada
+     *
+     */
+
     public function appointmentbydoctor($id, $date)
     {
 
@@ -164,7 +193,9 @@ class AppointmentController extends Controller
         return response()->json($resultResponse);
     }
 
-
+    /**
+     * Retorna todas las citas de una fecha seleccionada.
+     */
     public function appointmentall($date)
     {
 
@@ -192,7 +223,9 @@ class AppointmentController extends Controller
         return response()->json($resultResponse);
     }
 
-
+    /**
+     * Actualiza una cita especifica como atendida.
+     */
     public function attendappointment($id)
     {
         $appointment = appointment::where('id', $id)->first();
@@ -201,9 +234,12 @@ class AppointmentController extends Controller
         return response()->json(['Status' => 'attend'], 200);
     }
 
+    /**
+     * Elimina una cita especifica.
+     */
     public function cancelappointment($id)
     {
-        $appointment = appointment::where('id', $id)->first();          
+        $appointment = appointment::where('id', $id)->first();
         $availability = availability::findOrFail($appointment->availabily_id);
         $availability->status = 1;
         $availability->save();
@@ -211,6 +247,9 @@ class AppointmentController extends Controller
         return response()->json(['Status' => 'Cancel'], 200);
     }
 
+    /**
+     * Retorna la cantidad de citas del día, la cantidad de citas pendiente del día, la cantidad de citas del mes, la cantidad de citas pendiente del mes del médico el día de atención.
+     */
     public function appointmentbydoctorcount($id, $date)
     {
 
@@ -241,7 +280,9 @@ class AppointmentController extends Controller
     }
 
 
-
+    /**
+     * Retorna la cantidad de citas del día, la cantidad de citas pendiente del día, la cantidad de citas del mes, la cantidad de citas pendiente del mes del día de atención
+     */
     public function appointmentallcount($date)
     {
 

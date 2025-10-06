@@ -17,6 +17,11 @@ Route::controller(AuthController::class)->prefix('login')->group(function(){
       
 });
 
+Route::controller(PatientController::class)->prefix('register')->group(function(){
+    Route::post('/','store');
+      
+});
+
 
 
 
@@ -33,6 +38,9 @@ Route::middleware(['auth:sanctum'])->group(function(){
        }
        if ($request->user()->role=="medico"){
        $user = $request->user()->load('doctors'); // carga la relación
+       }
+        if ($request->user()->role=="paciente"){
+       $user = $request->user()->load('patients'); // carga la relación
        }
         return response()->json($user);
 
@@ -51,8 +59,11 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::controller(PatientController::class)->prefix('patient')->group(function(){
        Route::get('/','index');
        Route::post('/','store');
-       Route::patch('/{id}','update');    
+       Route::post('/{id}','update');  
+       Route::get('/showbyid/{id}','showbyid');
+       Route::get('/byuser/{id}','showbyuser');  
        Route::get('/{id}','show');
+
        Route::delete('/{id}','destroy');
 
     });
@@ -60,8 +71,9 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::controller(DoctorController::class)->prefix('doctor')->group(function(){
        Route::get('/','index');
        Route::post('/','store');
-       Route::patch('/{id}','update');    
+       Route::post('/{id}','update');    
        Route::get('/{id}','show');
+       Route::get('/showbyid/{id}','showbyid');
        Route::get('/byuser/{id}','showbyuser');
        Route::delete('/{id}','destroy');
 
@@ -70,19 +82,16 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::controller(SpecialtyController::class)->prefix('specialty')->group(function(){
        Route::get('/','index');
        Route::post('/','store');
-       Route::patch('/{id}','update');    
+       Route::post('/{id}','update');    
        Route::get('/{id}','show');
        Route::delete('/{id}','destroy');
 
     });
 
     Route::controller(AppointmentController::class)->prefix('appointment')->group(function(){
-       Route::get('/','index');
-       Route::post('/','store');
-       Route::patch('/{id}','update');    
-       Route::get('/{id}','show');
-       Route::delete('/{id}','destroy');
+       Route::post('/','store'); 
        Route::get('/appointmentbydoctor/{id}/{date}','appointmentbydoctor');
+       Route::get('/appointmentbypatient/{id}/{date}','appointmentbypatient');
        Route::get('/appointmentall/{date}','appointmentall');
        Route::get('/appointmentbydoctorcount/{id}/{date}','appointmentbydoctorcount');
        Route::get('/appointmentallcount/{date}','appointmentallcount');
@@ -94,9 +103,8 @@ Route::middleware(['auth:sanctum'])->group(function(){
    
 
     Route::controller(AvailabilityDoctorController::class)->prefix('availabilitydoctor')->group(function(){
-       Route::get('/','index');
-       Route::post('/','store');
-       Route::patch('/{id}','update');    
+
+       Route::post('/','store');         
        Route::get('/{id}/{date}','show');
        Route::get('/availability/{id}/{date}','showavailability');
        Route::get('/availabilityspecialty/{id}/{date}','showavailabilitySpecialty');
