@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\appointment;
 use App\Models\availability;
 use App\Http\Controllers\Controller;
@@ -140,9 +141,11 @@ class AppointmentController extends Controller
 
         $resultResponse = new ResultResponse();
         try {
-            $appointment = appointment::with(['doctors', 'availabilities', 'patients'])->where('patient_id', $id)->whereDate('date_appointments', $date)->whereHas('availabilities', function ($query) {
-                $query->where('status', '!=', 0);
-            })->get();
+            $appointment = Appointment::with(['doctors', 'availabilities', 'patients'])->where('patient_id', $id)->whereMonth('date_appointments', date('m', strtotime($date)))
+                ->whereYear('date_appointments', date('Y', strtotime($date)))->whereHas('availabilities', function ($query) {
+                    $query->where('status', '!=', 0);
+                })
+                ->get();
 
             if ($appointment->isEmpty()) {
                 $resultResponse->setData($appointment);

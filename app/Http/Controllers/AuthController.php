@@ -26,7 +26,7 @@ class AuthController extends Controller
 
 
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'Invalid credentials'], 200);
         }
 
         $user = User::where('email', $request->email)->first();
